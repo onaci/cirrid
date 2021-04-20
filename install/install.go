@@ -15,8 +15,8 @@ import (
 
 var InstallDir = "/usr/local/bin"
 var Commit = "DEVELOPMENT"
-var BuildTime = "DEVELOPMENT" + "+" + Commit
-var Version = "v0." + BuildTime
+var BuildTime = "DEVELOPMENT"
+var Version = "v0." + BuildTime + "+" + Commit
 var cmdDryRun = false
 
 func InstallBin() error {
