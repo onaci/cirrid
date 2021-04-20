@@ -123,9 +123,11 @@ func main() {
 			logger.Error(err)
 		}
 	case "upgrade":
-		log.Printf("UPGRADE:\n")
+		log.Printf("UPGRADE: not implemented yet\n")
+		// TODO: check for sudo / root
 	case "install":
 		log.Printf("INSTALL:\n")
+		// TODO: check for sudo / root
 		// copy to /usr/local/bin/cirrid-VERSION
 		// make softlink to /usr/local/bin/cirrid
 		err := install.InstallBin()
@@ -139,6 +141,7 @@ func main() {
 			log.Fatal(err)
 		}
 	default:
+		// TODO: check for sudo / root
 		err := service.Control(s, os.Args[1])
 		if err != nil {
 			log.Printf("Valid actions: %q\n", service.ControlAction)

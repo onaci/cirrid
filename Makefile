@@ -2,7 +2,7 @@
 COMMIT ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || echo v0)
 BUILDTIME ?= $(shell date +"%Y.%m.%d.%H%M%S")
 
-BUILDSETTING=-X github.com/onaci/cirrid/options.Commit=$(COMMIT) -X github.com/onaci/cirrid/options.BuildTime=$(BUILDTIME)
+BUILDSETTING=-X github.com/onaci/cirrid/install.Commit=$(COMMIT) -X github.com/onaci/cirrid/install.BuildTime=$(BUILDTIME)
 
 all: clean cirrid cirrid-osx cirrid.exe
 

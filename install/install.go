@@ -15,7 +15,7 @@ import (
 
 var InstallDir = "/usr/local/bin"
 var Commit = "DEVELOPMENT"
-var BuildTime = "DEVELOPMENT"
+var BuildTime = "DEVELOPMENT" + "+" + Commit
 var Version = "v0." + BuildTime
 var cmdDryRun = false
 
@@ -56,7 +56,11 @@ func InstallBin() error {
 	if err != nil {
 		return err
 	}
-	cirriDestinationPath := filepath.Join(InstallDir, fmt.Sprintf("%s-%s", "cirrid", Version))
+	versionForFileName := Version
+	if strings.Contains(versionForFileName, "-dirty") {
+		versionForFileName = "DEVELOPMENT"
+	}
+	cirriDestinationPath := filepath.Join(InstallDir, fmt.Sprintf("%s-%s", "cirrid", versionForFileName))
 	if err := updateBinary(cirriRunPath, cirriDestinationPath, cmdDryRun); err != nil {
 		return err
 	}
@@ -74,7 +78,7 @@ func updateBinary(newBinary, destinationPath string, dryRun bool) error {
 	}
 
 	InstallNeeded := ""
-	if BuildTime == "DEVELOPMENT" {
+	if BuildTime == "DEVELOPMENT" || strings.Contains(Version, "-dirty") {
 		InstallNeeded = BuildTime
 	} else {
 		// is there a possible old binary installed
