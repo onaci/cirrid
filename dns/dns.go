@@ -46,9 +46,9 @@ func (this *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			})
 		} else {
 			//if strings.HasSuffix(domain, "ona.im.") {
-			//if strings.Contains(domain, "ona.im") {
+			if strings.Contains(domain, "ona.im") {
 				logger.Infof("DNS request for (%s) failed\n", domain)
-			//}
+			}
 		}
 	}
 	w.WriteMsg(&msg)
