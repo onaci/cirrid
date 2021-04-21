@@ -46,15 +46,14 @@ func (this *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			})
 		} else {
 			//if strings.HasSuffix(domain, "ona.im.") {
-			if strings.Contains(domain, "ona.im") {
+			//if strings.Contains(domain, "ona.im") {
 				logger.Infof("DNS request for (%s) failed\n", domain)
-			}
+			//}
 		}
 	}
 	w.WriteMsg(&msg)
 }
 
-var ipaddr = "127.0.0.98"
 var port = 53
 var logger service.Logger
 
@@ -70,7 +69,7 @@ func DnsServer(l service.Logger) {
 	domainsToAddresses[hostname+".ona.im."] = ipAddress
 	domainsToAddresses["."+hostname+".ona.im."] = ipAddress
 
-	srv := &dns.Server{Addr: ipaddr + ":" + strconv.Itoa(port), Net: "udp"}
+	srv := &dns.Server{Addr: getDNSServerIPAddress() + ":" + strconv.Itoa(port), Net: "udp"}
 	srv.Handler = &handler{}
 	logger.Infof("DNS listening on port %d\n", port)
 	if err := srv.ListenAndServe(); err != nil {

@@ -47,7 +47,7 @@ func EnsureResolveConfigured(logger service.Logger) error {
 		if strings.HasPrefix(line, "DNS=") {
 			if strings.Compare(line, dnsline) != 0 {
 				resolvedConfChanged = true
-				logger.Warningf("Replacing /etc/systemd/resolve.conf line (%s) with (%s)\n", line, dnsline)
+				logger.Warningf("Replacing %s line (%s) with (%s)\n", resolvedConf, line, dnsline)
 			}
 			text = append(text, dnsline)
 			// use empty string as indicator that we've written it already
@@ -116,6 +116,8 @@ func getIpAddress() string {
 }
 
 func ResetHostServices(logger service.Logger) error {
+	logger.Infof("ResetHostServices")
+
 	// needs sudo - TODO: should check
 	out, stderr, err := util.RunLocally(util.Options{}, "systemctl", "restart", "systemd-resolved")
 	logger.Infof("%s\n", out)
@@ -139,4 +141,8 @@ func ResetHostServices(logger service.Logger) error {
 	// TODO: check if its in /etc/hosts...
 
 	return nil
+}
+
+func getDNSServerIPAddress() string {
+	return "127.0.0.98"
 }

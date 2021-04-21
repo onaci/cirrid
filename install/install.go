@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 
 	"github.com/onaci/cirrid/util"
 
@@ -38,18 +37,9 @@ func InstallBin() error {
 	if !stat.IsDir() {
 		return fmt.Errorf("InstallDir %s is not a directory", InstallDir)
 	}
-	// Check if the user bit is enabled in file permission
-	if stat.Mode().Perm()&(1<<(uint(7))) == 0 {
-		return fmt.Errorf("Please use 'sudo', you don't have permission to add files to InstallDir %s", InstallDir)
-	}
-	var sstat syscall.Stat_t
-	if err = syscall.Stat(InstallDir, &sstat); err != nil {
-		return err
-	}
 
-	err = nil
-	if uint32(os.Geteuid()) != sstat.Uid {
-		return fmt.Errorf("Please use 'sudo', you don't have permission to add files to InstallDir %s", InstallDir)
+	if err := checkPermission(stat, InstallDir); err != nil {
+		return err
 	}
 
 	cirriRunPath, err := os.Executable()

@@ -9,7 +9,7 @@ Because most people don't have static IP's, and the VPN isn't always up - or may
 - could do the relaying to external hosts?
 - auto configure host to use it
   - OSX: https://passingcuriosity.com/2013/dnsmasq-dev-osx/
-  - linux resolveconf - will need to install it...
+  - Linux: use systemd-resolved options
 
 ## 2. start a desktop systray app when the user logs in..
 
