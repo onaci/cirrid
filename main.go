@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/onaci/cirrid/dns"
@@ -127,7 +128,7 @@ func main() {
 		log.Printf("UPGRADE: not implemented yet\n")
 		// TODO: check for sudo / root
 	case "install":
-		log.Printf("INSTALL:\n")
+		log.Printf("installing:\n")
 		// TODO: check for sudo / root
 		// copy to /usr/local/bin/cirrid-VERSION
 		// make softlink to /usr/local/bin/cirrid
@@ -138,6 +139,11 @@ func main() {
 
 		// TODO: see if the service is already there, and if its definition is up to date...
 		err = service.Control(s, "install")
+		if err != nil && !strings.Contains(err.Error(), "Init already exists") {
+			log.Fatal(err)
+		}
+		log.Printf("Start service:\n")
+		err = service.Control(s, "restart")
 		if err != nil {
 			log.Fatal(err)
 		}
