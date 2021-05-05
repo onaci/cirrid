@@ -22,7 +22,6 @@ func EnsureResolveConfigured(logger service.Logger) error {
 	// DNS=127.0.0.98
 	// Domains=~host.ona.im
 	// systemctl restart systemd-resolved
-	hostname := getHostname()
 
 	// TODO: ask cirri container what its STACKDOMAIN is... use that instead
 	// docker inspect cirri | jq .[].Config.Env
@@ -37,10 +36,25 @@ func EnsureResolveConfigured(logger service.Logger) error {
 	scanner.Split(bufio.ScanLines)
 	var text []string
 
+	// yeah, deduping, and using that to get a list of ~hosts
+	domainMap := make(map[string]bool)
+	domains := []string{}
+	for host, _ := range domainsToAddresses {
+		logger.Infof("host: %s", host)
+		host = strings.TrimPrefix(host, "*.")
+		host = strings.TrimSuffix(host, ".")
+		if _, ok := domainMap[host]; !ok {
+			domains = append(domains, "~"+host)
+		}
+		domainMap[host] = true
+	}
+
 	// Big nasty assumption that resolved.conf only contains a [Resolve] section
 	dnsline := "DNS=127.0.0.98"
 	//domainline := "Domains=~" + hostname + ".ona.im,~host.ona.im"
-	domainline := "Domains=~" + hostname + ".ona.im"
+	domainline := "Domains=" + strings.Join(domains, " ")
+	logger.Infof("domainline: %s", domainline)
+	//	domainline := "Domains=" + strings.Join([]string{"~" + hostname + ".ona.im", "~" + "t" + ".ona.im"}, " ")
 	resolvedConfChanged := false
 	for scanner.Scan() {
 		line := scanner.Text()

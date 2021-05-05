@@ -61,13 +61,21 @@ func SetLogger(l service.Logger) {
 	logger = l
 }
 
-func DnsServer(l service.Logger) {
-	logger = l
-
+func SetDNSValues() {
 	hostname := getHostname()
 	ipAddress := getIpAddress()
 	domainsToAddresses[hostname+".ona.im."] = ipAddress
 	domainsToAddresses["."+hostname+".ona.im."] = ipAddress
+
+	// TODO: don't ship this!
+	domainsToAddresses["t.ona.im."] = ipAddress
+	domainsToAddresses[".t.ona.im."] = ipAddress
+	domainsToAddresses["portal.ereefs.info."] = "203.100.31.16"
+	domainsToAddresses["data.ereefs.info."] = "203.100.31.16"
+}
+
+func DnsServer(l service.Logger) {
+	logger = l
 
 	srv := &dns.Server{Addr: getDNSServerIPAddress() + ":" + strconv.Itoa(port), Net: "udp"}
 	srv.Handler = &handler{}
@@ -77,6 +85,7 @@ func DnsServer(l service.Logger) {
 	}
 }
 
+// TODO: get STACKDOMAIN from cirri container
 func getHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {

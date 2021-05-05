@@ -24,3 +24,13 @@ especially for remote cluster
 - install to /usr/local/bin/cirrid-VERSION and use softlink to /usr/local/bin/cirrid
 - regular check for updates to help users keep up to date
 - tracing to enable debugging
+
+## TODO:
+
+1. use goreleaser
+2. add a cfg file that the daemon
+  * so users can add a list of dns entries to give answers to
+3. prom metrics endpoint
+4. tui to edit / add / remove entries
+5. a cirri container watcher that looks at the autosave.json and auto adds dns entries (with user able to cfg on/off) 
+6. seriously debug why there's a hickup in resolving dns - and ~20 dns requests per lookup? (this may be only the first time after flushing the cache..)

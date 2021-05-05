@@ -42,6 +42,8 @@ func (p *program) run() error {
 	logger.Infof("I'm running %v using exec: %s, which is actually file %s.", service.Platform(), os.Args[0], realPath)
 	dns.SetLogger(logger)
 
+	dns.SetDNSValues()
+
 	dns.EnsureResolveConfigured(logger)
 	time.Sleep(100 * time.Millisecond)
 	go dns.DnsServer(logger)
