@@ -27,8 +27,9 @@ especially for remote cluster
 
 ## TODO:
 
-1. use goreleaser
-2. add a cfg file that the daemon
+1. use address list to generate osx conf files (its still hardcoded)
+2. use goreleaser
+3. add a cfg file that the daemon
   * so users can add a list of dns entries to give answers to
 3. prom metrics endpoint
 4. tui to edit / add / remove entries

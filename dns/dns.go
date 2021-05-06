@@ -70,8 +70,8 @@ func SetDNSValues() {
 	// TODO: don't ship this!
 	domainsToAddresses["t.ona.im."] = ipAddress
 	domainsToAddresses[".t.ona.im."] = ipAddress
-	domainsToAddresses["portal.ereefs.info."] = "203.100.31.16"
-	domainsToAddresses["data.ereefs.info."] = "203.100.31.16"
+	domainsToAddresses["portal.ereefs.info."] = "203.101.230.69"
+	domainsToAddresses["data.ereefs.info."] = "203.101.230.69"
 }
 
 func DnsServer(l service.Logger) {
