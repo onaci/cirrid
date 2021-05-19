@@ -28,7 +28,7 @@ github-release: clean
 			--draft \
 			--prerelease \
 			--commitish master \
-			--message "021 April 2021, cirrid ona.im DNS shim for OSX and Linux." \
+			--message "20 May 2021, cirrid ona.im DNS shim for OSX and Linux." \
 			--attach "cirrid#Linux amd64" \
 			--attach "cirrid-osx#OS X amd64" \
 			--attach "cirrid.exe#Windows amd64" \
