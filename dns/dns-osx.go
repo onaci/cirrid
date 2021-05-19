@@ -20,7 +20,8 @@ func EnsureResolveConfigured(logger service.Logger) error {
 	var text []string
 	requiredLine := "nameserver " + getDNSServerIPAddress()
 
-	hostname := getHostname()
+	// TODO: use the domainsToAddresses list
+	hostname := GetHostname()
 	resolvedConf := "/etc/resolver/" + hostname + ".ona.im"
 	file, err := os.Open(resolvedConf)
 	if err != nil {

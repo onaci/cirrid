@@ -12,6 +12,8 @@ import (
 	"github.com/onaci/cirrid/install"
 
 	"github.com/kardianos/service"
+
+	"gopkg.in/ini.v1"
 )
 
 var logger service.Logger
@@ -20,6 +22,36 @@ var logger service.Logger
 //  Define Start and Stop methods.
 type program struct {
 	exit chan struct{}
+}
+
+const globalCfgFile string = "/etc/cirrid.ini"
+const defaultCfg = `
+zone = "ona.im"
+
+# ask the cirri container what host&stackdomain settings its listening to
+ask_cirri = true
+
+# also set current hostname + zone = magic
+use_hostname = true
+
+[hosts]
+# list of hostname to IP address
+# *.hostname.zone will be set to the same as hostname.zone, unless you also specify ".hostname=IP"
+# instead of IP address, you can use the name of the network interface to use, or the string 'magic', which will try to "just work"
+example = magic
+
+`
+
+func ensureCfgFile() (*ini.File, error) {
+	cfg, err := ini.LooseLoad([]byte(defaultCfg), globalCfgFile)
+
+	// this lets us update the file in place
+	err = cfg.SaveTo(globalCfgFile)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Reload()
+	return cfg, err
 }
 
 func (p *program) Start(s service.Service) error {
@@ -35,6 +67,12 @@ func (p *program) Start(s service.Service) error {
 	return nil
 }
 func (p *program) run() error {
+	cfg, err := ensureCfgFile()
+	if err != nil {
+		fmt.Printf("Fail to read /etc/cirrid.ini file: %v", err)
+		os.Exit(1)
+	}
+	logger.Infof("Zone set to %s\n", cfg.Section("").Key("zone").String())
 
 	realPath, _ := os.Executable()
 	realPath, _ = filepath.EvalSymlinks(realPath)
@@ -42,7 +80,22 @@ func (p *program) run() error {
 	logger.Infof("I'm running %v using exec: %s, which is actually file %s.", service.Platform(), os.Args[0], realPath)
 	dns.SetLogger(logger)
 
-	dns.SetDNSValues()
+	//dns.SetDNSValues()
+	for _, key := range cfg.Section("hosts").Keys() {
+		dns.SetDNSValue(
+			key.Name(),
+			cfg.Section("").Key("zone").String(),
+			key.MustString("magic"),
+		)
+	}
+	if cfg.Section("").Key("use_hostname").MustBool(true) {
+		dns.SetDNSValue(
+			dns.GetHostname(),
+			cfg.Section("").Key("zone").String(),
+			"magic",
+		)
+	}
+	dns.EnsureWildCards()
 
 	dns.EnsureResolveConfigured(logger)
 	time.Sleep(100 * time.Millisecond)
@@ -138,7 +191,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		_, err = ensureCfgFile()
+		if err != nil {
+			fmt.Printf("Fail to read /etc/cirrid.ini file: %v", err)
+			os.Exit(1)
+		}
 		// TODO: see if the service is already there, and if its definition is up to date...
 		err = service.Control(s, "install")
 		if err != nil && !strings.Contains(err.Error(), "Init already exists") {

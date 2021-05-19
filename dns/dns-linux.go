@@ -39,8 +39,8 @@ func EnsureResolveConfigured(logger service.Logger) error {
 	// yeah, deduping, and using that to get a list of ~hosts
 	domainMap := make(map[string]bool)
 	domains := []string{}
-	for host, _ := range domainsToAddresses {
-		logger.Infof("host: %s", host)
+	for host, ip := range domainsToAddresses {
+		logger.Infof("host: %s -> %s", host, ip)
 		host = strings.TrimPrefix(host, "*.")
 		host = strings.TrimSuffix(host, ".")
 		if _, ok := domainMap[host]; !ok {

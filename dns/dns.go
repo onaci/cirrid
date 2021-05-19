@@ -45,6 +45,7 @@ func (this *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 				A:   net.ParseIP(address),
 			})
 		} else {
+			// TODO: is there a notMe answer?
 			//if strings.HasSuffix(domain, "ona.im.") {
 			if strings.Contains(domain, "ona.im") {
 				logger.Infof("DNS request for (%s) failed\n", domain)
@@ -61,17 +62,41 @@ func SetLogger(l service.Logger) {
 	logger = l
 }
 
-func SetDNSValues() {
-	hostname := getHostname()
-	ipAddress := getIpAddress()
-	domainsToAddresses[hostname+".ona.im."] = ipAddress
-	domainsToAddresses["."+hostname+".ona.im."] = ipAddress
+func SetDNSValue(hostname, zone, ipAddress string) error {
+	// TODO: maybe there's a dns name string manipulation module
+	fullname := hostname
+	if !strings.Contains(strings.TrimPrefix(hostname, "."), ".") {
+		if !strings.HasPrefix(zone, ".") {
+			zone = "." + zone
+		}
+		fullname = hostname + zone
+	}
 
-	// TODO: don't ship this!
-	domainsToAddresses["t.ona.im."] = ipAddress
-	domainsToAddresses[".t.ona.im."] = ipAddress
-	domainsToAddresses["portal.ereefs.info."] = "203.101.230.69"
-	domainsToAddresses["data.ereefs.info."] = "203.101.230.69"
+	if ipAddress == "magic" {
+		ipAddress = getIpAddress()
+	}
+
+	domainsToAddresses[fullname+"."] = ipAddress
+
+	return nil
+}
+
+func EnsureWildCards() {
+	for host, ip := range domainsToAddresses {
+		if strings.HasPrefix(host, ".") {
+			continue
+		}
+		done := false
+		for h, _ := range domainsToAddresses {
+			if h == "."+host {
+				done = true
+				break
+			}
+		}
+		if !done {
+			domainsToAddresses["."+host] = ip
+		}
+	}
 }
 
 func DnsServer(l service.Logger) {
@@ -79,14 +104,14 @@ func DnsServer(l service.Logger) {
 
 	srv := &dns.Server{Addr: getDNSServerIPAddress() + ":" + strconv.Itoa(port), Net: "udp"}
 	srv.Handler = &handler{}
-	logger.Infof("DNS listening on port %d\n", port)
+	logger.Infof("DNS listening on IP %s\n", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil {
 		logger.Errorf("Failed to set udp listener %s\n", err.Error())
 	}
 }
 
 // TODO: get STACKDOMAIN from cirri container
-func getHostname() string {
+func GetHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {
 		logger.Error(err)
