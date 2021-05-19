@@ -45,6 +45,8 @@ example = magic
 func ensureCfgFile() (*ini.File, error) {
 	cfg, err := ini.LooseLoad([]byte(defaultCfg), globalCfgFile)
 
+	logger.Infof("Ensuring there's a cfg file at %s", globalCfgFile)
+
 	// this lets us update the file in place
 	err = cfg.SaveTo(globalCfgFile)
 	if err != nil {
@@ -81,13 +83,17 @@ func (p *program) run() error {
 	dns.SetLogger(logger)
 
 	//dns.SetDNSValues()
-	for _, key := range cfg.Section("hosts").Keys() {
-		dns.SetDNSValue(
-			key.Name(),
-			cfg.Section("").Key("zone").String(),
-			key.MustString("magic"),
-		)
+	if cfg.Section("").Key("ask_cirri").MustBool(true) {
+		stackdomain := dns.GetCirriStackdomain()
+		if stackdomain != "" {
+			dns.SetDNSValue(
+				stackdomain,
+				cfg.Section("").Key("zone").String(),
+				"magic",
+			)
+		}
 	}
+
 	if cfg.Section("").Key("use_hostname").MustBool(true) {
 		dns.SetDNSValue(
 			dns.GetHostname(),
@@ -95,6 +101,15 @@ func (p *program) run() error {
 			"magic",
 		)
 	}
+
+	for _, key := range cfg.Section("hosts").Keys() {
+		dns.SetDNSValue(
+			key.Name(),
+			cfg.Section("").Key("zone").String(),
+			key.MustString("magic"),
+		)
+	}
+
 	dns.EnsureWildCards()
 
 	dns.EnsureResolveConfigured(logger)
@@ -162,6 +177,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// TODO: detect if its installed or not, and tell the user if that's why it failed to stop/start/restart
 	go func() {
 		for {
 			err := <-errs

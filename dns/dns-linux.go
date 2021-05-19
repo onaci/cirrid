@@ -43,6 +43,7 @@ func EnsureResolveConfigured(logger service.Logger) error {
 		logger.Infof("host: %s -> %s", host, ip)
 		host = strings.TrimPrefix(host, "*.")
 		host = strings.TrimSuffix(host, ".")
+		host = strings.TrimPrefix(host, ".")
 		if _, ok := domainMap[host]; !ok {
 			domains = append(domains, "~"+host)
 		}

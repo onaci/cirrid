@@ -5,6 +5,7 @@ package dns
 // and ensure that the host has it added to the system'd dns resolution...
 
 import (
+	"encoding/json"
 	"net"
 	"os"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/kardianos/service"
 	"github.com/miekg/dns"
+	"github.com/onaci/cirrid/util"
 )
 
 // test using:
@@ -118,4 +120,33 @@ func GetHostname() string {
 	}
 	logger.Infof("Hostname: %s", hostname)
 	return hostname
+}
+
+func GetCirriStackdomain() string {
+	stackdomain := ""
+	// get docker bridge's gateway address (linux only)
+	out, stderr, err := util.RunLocally(util.Options{}, "docker", "inspect", "cirri")
+	//logger.Infof("%s\n", out)
+	logger.Infof("STDERR: %s\n", stderr)
+	if err != nil {
+		logger.Infof("ERROR: %s\n", err)
+		return stackdomain
+	} else {
+		var result []interface{}
+		json.Unmarshal([]byte(out), &result)
+		cfg := result[0].(map[string]interface{})
+		Config := cfg["Config"].(map[string]interface{})
+		Env := Config["Env"].([]interface{})
+
+		stackdomainPrefix := "STACKDOMAIN="
+		for _, r := range Env {
+			e := r.(string)
+			if strings.HasPrefix(e, stackdomainPrefix) {
+				stackdomain = strings.TrimPrefix(e, stackdomainPrefix)
+			}
+		}
+
+		logger.Infof("found stackdomain from cirri: (%s)\n", stackdomain)
+	}
+	return stackdomain
 }
