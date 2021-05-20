@@ -15,14 +15,23 @@ import (
 
 func EnsureResolveConfigured(logger service.Logger) error {
 	logger.Infof("EnsureResolveConfigured")
+	for host, ip := range domainsToAddresses {
+		logger.Infof("host: %s -> %s", host, ip)
+		host = strings.TrimPrefix(host, "*.")
+		host = strings.TrimSuffix(host, ".")
+		host = strings.TrimPrefix(host, ".")
+		createResolveFile(host)
+	}
+	return nil
+}
 
+func createResolveFile(host string) {
 	resolvedConfChanged := false
 	var text []string
 	requiredLine := "nameserver " + getDNSServerIPAddress()
 
 	// TODO: use the domainsToAddresses list
-	hostname := GetHostname()
-	resolvedConf := "/etc/resolver/" + hostname + ".ona.im"
+	resolvedConf := "/etc/resolver/" + host
 	file, err := os.Open(resolvedConf)
 	if err != nil {
 		logger.Infof("no %s file: %s\n", resolvedConf, err)
@@ -68,8 +77,6 @@ func EnsureResolveConfigured(logger service.Logger) error {
 			logger.Error(err)
 		}
 	}
-
-	return nil
 }
 
 func ResetHostServices(logger service.Logger) error {

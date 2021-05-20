@@ -1,5 +1,21 @@
 # Cirri Daemon
 
+## installation
+
+```
+# download latest release
+chmod 755 ./cirrid
+sudo ./cirrid install
+```
+
+On our internal OSX boxes, you'll need to become ading first - GUI, or `ComputerAdminCLI --add`.
+
+To see the serice log output:
+
+* Linux: `sudo journalctl -fu cirrid`
+* OSX: `cat /usr/local/var/log/cirrid.*`
+* Windows: sorry, not implemented yet
+
 ## 1. enable *.host.ona.im DNS for portable cirri dev
 
 Because most people don't have static IP's, and the VPN isn't always up - or maybe they're on a plane.
@@ -27,11 +43,12 @@ especially for remote cluster
 
 ## TODO:
 
-1. use address list to generate osx conf files (its still hardcoded)
 2. use goreleaser
-3. add a cfg file that the daemon
-  * so users can add a list of dns entries to give answers to
 3. prom metrics endpoint
 4. tui to edit / add / remove entries
 5. a cirri container watcher that looks at the autosave.json and auto adds dns entries (with user able to cfg on/off) 
 6. seriously debug why there's a hickup in resolving dns - and ~20 dns requests per lookup? (this may be only the first time after flushing the cache..)
+7. `cirrid status` - tell me what dns values are set, some metrics?
+8. `cirrid logs` - tail the logs?
+9. watch the inifile, reload...
+10. ini setting for log level
